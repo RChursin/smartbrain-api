@@ -23,7 +23,7 @@ app.use(cors())
 
 
 app.get('/', (req, res) => {
-    res.send('it is working!');
+    res.send('it is working! Pick a route /signin or /register');
 });
 
 app.post('/signin', (req, res) => {
@@ -64,7 +64,7 @@ app.post('/register', (req, res) => {
             return trx('users')
                 .returning('*')
                 .insert({
-                    email: loginEmail[0],
+                    email: loginEmail[0].email,
                     name: name,
                     joined: new Date()
                 })
