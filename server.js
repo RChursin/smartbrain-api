@@ -1,9 +1,11 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const bcrypt = require('bcrypt-nodejs');
+// const bodyParser = require('body-parser');
+// const bcrypt = require('bcrypt-nodejs');
+const cors = require('cors');
 
 const app = express();
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(cors())
 
 const database = {
     users: [
@@ -23,18 +25,18 @@ const database = {
             entries: 0,
             joined: new Date()
         }
-    ],
-    login: [
-        {
-            id: '555',
-            hash: '',
-            email: 'john@example.com'
-        }
     ]
+    // login: [
+    //     {
+    //         id: '555',
+    //         hash: '',
+    //         email: 'john@example.com'
+    //     }
+    // ]
 }
 
 app.get('/', (req, res) => {
-    res.send('Working');
+    res.send(database);
 });
 
 app.post('/signin', (req, res) => {
@@ -90,6 +92,6 @@ app.put('/image', (req, res) => {
 });
 
 
-app.listen(3000, () => {
-    console.log('My server is running on port 3000');
+app.listen(3001, () => {
+    console.log('My server is running on port localhost:3001');
 });
