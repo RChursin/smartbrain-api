@@ -1,5 +1,4 @@
 const express = require('express');
-// const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt-nodejs');
 const cors = require('cors');
 const knex = require('knex');
@@ -24,33 +23,59 @@ app.use(cors())
 
 
 app.get('/', (req, res) => {
-    res.send();
+    res.send('it is working!');
 });
 
 app.post('/signin', (req, res) => {
-    if (req.body.email === database.users[0].email &&
-        req.body.password === database.users[0].password) {
-        res.json('Success');
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json('Incorrect form submission');
     } else {
-        res.status(400).json('Error logging in');
+        db.select('email', 'hash').from('login')
+            .where('email', '=', email)
+            .then(data => {
+                const isValid = bcrypt.compareSync(password, data[0].hash);
+                if (isValid) {
+                    return db.select('*').from('users')
+                        .where('email', '=', email)
+                        .then(user => {
+                            res.json(user[0])
+                        })
+                        .catch(err => res.status(400).json('Unable to get user'))
+                } else {
+                    res.status(400).json('Wrong credentials');
+                }
+            })
+            .catch(err => res.status(400).json('Wrong credentials'));
     }
-    res.json('Signing in endpoint is working');
 });
 
 app.post('/register', (req, res) => {
-    const {email, name } = req.body;
-    db('users')
-        .returning('*')
-        .insert
-    ({
-            email: email,
-            name: name,
-            joined: new Date()
+    const {email, name, password } = req.body;
+    const hash = bcrypt.hashSync(password);
+    db.transaction(trx => {
+        trx.insert({
+            hash: hash,
+            email: email
         })
-        .then(user => {
-            res.json(user[0]);
+        .into('login')
+        .returning('email')
+        .then(loginEmail => {
+            return trx('users')
+                .returning('*')
+                .insert({
+                    email: loginEmail[0],
+                    name: name,
+                    joined: new Date()
+                })
+                .then(user => {
+                    res.json(user[0]);
+                })
         })
-        .catch(err => res.status(400).json('Unable to register'));
+        .then(trx.commit)
+        .catch(trx.rollback)
+    })
+    .catch(err => res.status(400).json('Unable to register'));
 });
 
 app.get('/profile/:id', (req, res) => {
@@ -78,6 +103,6 @@ app.put('/image', (req, res) => {
 });
 
 
-app.listen(3001, () => {
+app.listen(3000, () => {
     console.log('My server is running on port localhost:3001');
 });
