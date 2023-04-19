@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt-nodejs');
 
 const app = express();
 app.use(bodyParser.json());
@@ -21,6 +22,13 @@ const database = {
             password: 'bananas',
             entries: 0,
             joined: new Date()
+        }
+    ],
+    login: [
+        {
+            id: '555',
+            hash: '',
+            email: 'john@example.com'
         }
     ]
 }
