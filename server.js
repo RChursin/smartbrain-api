@@ -34,5 +34,5 @@ app.put('/image', (req, res) => { handleImage(req, res, db) });
 
 
 app.listen(3000, () => {
-    console.log('My server is running on port localhost:3001');
+    console.log('My server is running on port localhost:3000');
 });
